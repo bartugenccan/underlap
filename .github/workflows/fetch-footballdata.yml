@@ -14,12 +14,15 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
       - run: go run ./cmd/underlap fetch footballdata --out data/raw/footballdata
+      # Runs even when some seasons failed, so the ones that did download are
+      # kept; the job still ends red because the fetch step failed.
       - name: Commit refreshed CSVs
+        if: ${{ !cancelled() }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

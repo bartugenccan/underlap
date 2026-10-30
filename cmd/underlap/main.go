@@ -98,12 +98,20 @@ func fetchFootballData(ctx context.Context, args []string) error {
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	// Keep going past a failed season so one bad file does not cost the rest;
+	// still exit non-zero so the failure is visible.
 	client := &http.Client{Timeout: 30 * time.Second}
+	var failed []string
 	for _, s := range seasonList(*seasons) {
 		if err := footballdata.Fetch(ctx, client, s, *out); err != nil {
-			return err
+			fmt.Fprintln(os.Stderr, err)
+			failed = append(failed, s)
+			continue
 		}
 		fmt.Printf("fetched %s\n", footballdata.FileName(s))
+	}
+	if len(failed) > 0 {
+		return fmt.Errorf("failed seasons: %s", strings.Join(failed, ","))
 	}
 	return nil
 }
