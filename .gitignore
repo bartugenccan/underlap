@@ -1,0 +1,13 @@
+# Build output
+/underlap
+/underlap.exe
+/bin/
+
+# Local env and scratch
+.env
+*.local
+/tmp/
+
+# Editors
+.vscode/
+.idea/

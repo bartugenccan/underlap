@@ -1,0 +1,21 @@
+name: underlap
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: underlap
+      POSTGRES_PASSWORD: underlap
+      POSTGRES_DB: underlap
+    ports:
+      - "54320:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U underlap"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:
