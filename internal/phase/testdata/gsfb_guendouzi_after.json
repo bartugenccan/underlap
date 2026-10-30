@@ -1,0 +1,36 @@
+{
+  "name": "GS-FB: Guendouzi Torreira'ya birebir çıkıyor, Kanté derinlik veriyor",
+  "attacking_team": "Galatasaray",
+  "defending_team": "Fenerbahçe",
+  "ball_carrier": "torreira",
+  "attackers": [
+    {"id": "ugurcan", "name": "Uğurcan", "x": 6, "y": 34, "role": "GK"},
+    {"id": "abdulkerim", "name": "Abdülkerim", "x": 20, "y": 22, "role": "CB"},
+    {"id": "davinson", "name": "Davinson", "x": 20, "y": 46, "role": "CB"},
+    {"id": "jakobs", "name": "Jakobs", "x": 34, "y": 6, "role": "LB"},
+    {"id": "torreira", "name": "Torreira", "x": 40, "y": 34, "role": "DM"},
+    {"id": "lemina", "name": "Lemina", "x": 46, "y": 18, "role": "CM"},
+    {"id": "batrakov", "name": "Batrakov", "x": 58, "y": 44, "role": "AM"},
+    {"id": "sallai", "name": "Sallai", "x": 62, "y": 63, "role": "RB"},
+    {"id": "yunus", "name": "Yunus", "x": 64, "y": 52, "role": "RW"},
+    {"id": "baris", "name": "Barış", "x": 66, "y": 8, "role": "LW"},
+    {"id": "osimhen", "name": "Osimhen", "x": 78, "y": 30, "role": "ST"}
+  ],
+  "defenders": [
+    {"id": "ederson", "name": "Ederson", "x": 101, "y": 34, "role": "GK"},
+    {"id": "semedo", "name": "Semedo", "x": 74, "y": 12, "role": "RB"},
+    {"id": "skriniar", "name": "Skriniar", "x": 77, "y": 28, "role": "CB"},
+    {"id": "opong", "name": "Opong", "x": 77, "y": 42, "role": "CB"},
+    {"id": "brown", "name": "Brown", "x": 74, "y": 58, "role": "LB"},
+    {"id": "kante", "name": "Kanté", "x": 68, "y": 30, "role": "DM"},
+    {"id": "guendouzi", "name": "Guendouzi", "x": 41, "y": 31, "role": "CM"},
+    {"id": "oguz", "name": "Oğuz", "x": 50, "y": 16, "role": "RM"},
+    {"id": "kerem", "name": "Kerem", "x": 60, "y": 60, "role": "LM"},
+    {"id": "greenwood", "name": "Greenwood", "x": 28, "y": 44, "role": "AM"},
+    {"id": "vedat", "name": "Vedat", "x": 28, "y": 24, "role": "ST"}
+  ],
+  "markings": [
+    {"defender": "guendouzi", "mode": "man", "target": "torreira"},
+    {"defender": "kante", "mode": "zone"}
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "Lille-GS: Mbappé derine geliyor, Jakobs onu takip edip yukarı çıkıyor",
+  "attacking_team": "Lille",
+  "defending_team": "Galatasaray",
+  "ball_carrier": "mbappe",
+  "attackers": [
+    {"id": "ozer", "name": "Berke Özer", "x": 5, "y": 34, "role": "GK"},
+    {"id": "ribeiro", "name": "Ribeiro", "x": 16, "y": 22, "role": "CB"},
+    {"id": "rcb", "name": "Alexsandro", "x": 16, "y": 46, "role": "CB"},
+    {"id": "bentaleb", "name": "Bentaleb", "x": 24, "y": 60, "role": "DM"},
+    {"id": "santos", "name": "Santos", "x": 30, "y": 50, "role": "RB"},
+    {"id": "mbappe", "name": "Mbappé", "x": 36, "y": 64, "role": "RW"},
+    {"id": "pegu", "name": "Pegu", "x": 38, "y": 4, "role": "LB"},
+    {"id": "perin", "name": "Perin", "x": 40, "y": 14, "role": "LW"},
+    {"id": "mukau", "name": "Mukau", "x": 40, "y": 34, "role": "CM"},
+    {"id": "haraldsson", "name": "Haraldsson", "x": 56, "y": 58, "role": "AM"},
+    {"id": "ueda", "name": "Ueda", "x": 58, "y": 34, "role": "ST"}
+  ],
+  "defenders": [
+    {"id": "ugurcan", "name": "Uğurcan", "x": 101, "y": 34, "role": "GK"},
+    {"id": "jakobs", "name": "Jakobs", "x": 38, "y": 60, "role": "LB"},
+    {"id": "abdulkerim", "name": "Abdülkerim", "x": 66, "y": 44, "role": "CB"},
+    {"id": "davinson", "name": "Davinson", "x": 66, "y": 26, "role": "CB"},
+    {"id": "singo", "name": "Singo", "x": 62, "y": 10, "role": "RB"},
+    {"id": "torreira", "name": "Torreira", "x": 44, "y": 30, "role": "DM"},
+    {"id": "lemina", "name": "Lemina", "x": 40, "y": 44, "role": "CM"},
+    {"id": "batrakov", "name": "Batrakov", "x": 34, "y": 36, "role": "AM"},
+    {"id": "baris", "name": "Barış", "x": 32, "y": 56, "role": "LW"},
+    {"id": "yunus", "name": "Yunus", "x": 34, "y": 16, "role": "RW"},
+    {"id": "osimhen", "name": "Osimhen", "x": 24, "y": 34, "role": "ST"}
+  ],
+  "markings": [
+    {"defender": "jakobs", "mode": "man", "target": "mbappe"}
+  ]
+}

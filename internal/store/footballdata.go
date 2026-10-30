@@ -9,7 +9,7 @@ import (
 
 // IngestStats says what an ingest run touched.
 type IngestStats struct {
-	Matches, Played, OddsRows int
+	Matches, Played, Awarded, OddsRows int
 }
 
 // UpsertFootballData writes parsed football-data matches in one transaction.
@@ -59,23 +59,28 @@ func (s *Store) UpsertFootballData(ctx context.Context, matches []footballdata.M
 		var matchID int
 		err = tx.QueryRow(ctx, `
 			INSERT INTO matches (season_id, kickoff_at, home_team_id, away_team_id,
-			                     home_goals, away_goals, ht_home_goals, ht_away_goals, referee_id)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			                     home_goals, away_goals, ht_home_goals, ht_away_goals, referee_id, awarded)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 			ON CONFLICT (season_id, home_team_id, away_team_id) DO UPDATE SET
 				kickoff_at    = EXCLUDED.kickoff_at,
 				home_goals    = EXCLUDED.home_goals,
 				away_goals    = EXCLUDED.away_goals,
 				ht_home_goals = EXCLUDED.ht_home_goals,
 				ht_away_goals = EXCLUDED.ht_away_goals,
-				referee_id    = COALESCE(EXCLUDED.referee_id, matches.referee_id)
+				referee_id    = COALESCE(EXCLUDED.referee_id, matches.referee_id),
+				-- OR, not overwrite: other sources (API-Football) also flag forfeits.
+				awarded       = matches.awarded OR EXCLUDED.awarded
 			RETURNING id`,
-			seasonID, m.Kickoff, home, away, m.HomeGoals, m.AwayGoals, m.HTHome, m.HTAway, referee).Scan(&matchID)
+			seasonID, m.Kickoff, home, away, m.HomeGoals, m.AwayGoals, m.HTHome, m.HTAway, referee, m.Awarded()).Scan(&matchID)
 		if err != nil {
 			return st, fmt.Errorf("match %s %s-%s: %w", m.Season, m.Home, m.Away, err)
 		}
 		st.Matches++
 		if m.Played() {
 			st.Played++
+		}
+		if m.Awarded() {
+			st.Awarded++
 		}
 
 		_, err = tx.Exec(ctx,

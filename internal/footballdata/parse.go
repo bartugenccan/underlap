@@ -49,6 +49,17 @@ type Match struct {
 
 func (m Match) Played() bool { return m.HomeGoals != nil && m.AwayGoals != nil }
 
+// Awarded reports a forfeit: a result with no prices from any bookmaker and
+// the 3-0 scoreline used for walkovers. In Süper Lig data this is exactly the
+// 29 matches of Gaziantep and Hatayspor after they withdrew in February 2023.
+func (m Match) Awarded() bool {
+	if !m.Played() || len(m.Odds) > 0 {
+		return false
+	}
+	h, a := *m.HomeGoals, *m.AwayGoals
+	return (h == 3 && a == 0) || (h == 0 && a == 3)
+}
+
 // oddsColumns maps a column prefix to (bookmaker, kind). The prefix is followed
 // by H, D or A in the CSV header, e.g. PSCH = Pinnacle closing home price.
 var oddsColumns = []struct{ prefix, bookmaker, kind string }{

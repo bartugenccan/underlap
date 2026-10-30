@@ -3,6 +3,9 @@
 /underlap.exe
 /bin/
 
+# Raw API responses: local only, the provider's terms may not allow redistribution
+/data/cache/
+
 # Local env and scratch
 .env
 *.local

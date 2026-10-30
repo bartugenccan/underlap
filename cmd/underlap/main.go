@@ -4,8 +4,14 @@
 //	underlap fetch footballdata  [--seasons 1718,...,2627] [--out data/raw/footballdata]
 //	underlap ingest footballdata [--seasons ...] [--dir data/raw/footballdata]
 //	underlap baseline backtest   [--eval-from 2223] [--csv-dir DIR]
+//	underlap fetch apifootball   [--seasons 2024,2023,2022] [--budget 90] [--priority-team Galatasaray]
+//	underlap ingest apifootball  [--seasons 2024,2023,2022]
+//	underlap analysis realism    [--out data/reference/realism.json]
+//	underlap analysis team-profile --team Galatasaray --season 2425
 //
 // DATABASE_URL overrides the default local docker-compose database.
+// API_FOOTBALL_KEY is read from the environment or a .env file in the working
+// directory.
 package main
 
 import (
@@ -22,6 +28,7 @@ import (
 	"github.com/bartugenccan/underlap/internal/baseline"
 	"github.com/bartugenccan/underlap/internal/footballdata"
 	"github.com/bartugenccan/underlap/internal/store"
+	"github.com/bartugenccan/underlap/internal/teams"
 )
 
 const (
@@ -34,7 +41,13 @@ const usage = `usage:
   underlap migrate
   underlap fetch footballdata  [--seasons LIST] [--out DIR]
   underlap ingest footballdata [--seasons LIST] [--dir DIR]
-  underlap baseline backtest   [--eval-from SEASON] [--csv-dir DIR]`
+  underlap baseline backtest   [--eval-from SEASON] [--csv-dir DIR]
+  underlap fetch apifootball   [--seasons LIST] [--budget N] [--priority-team NAME] [--cache DIR]
+  underlap ingest apifootball  [--seasons LIST] [--cache DIR]
+  underlap phase analyze       --file SCENARIO.json [--json]
+  underlap serve               [--addr localhost:8080] [--origin http://localhost:3000]
+  underlap analysis realism    [--out FILE]
+  underlap analysis team-profile [--team NAME] [--season CODE] [--json FILE]`
 
 var errUsage = errors.New(usage)
 
@@ -42,6 +55,10 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
+	if err := loadDotEnv(".env"); err != nil {
+		fmt.Fprintln(os.Stderr, "read .env:", err)
+		os.Exit(1)
+	}
 	if err := run(ctx, os.Args[1:]); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		if errors.Is(err, errUsage) {
@@ -62,6 +79,18 @@ func run(ctx context.Context, args []string) error {
 		return ingestFootballData(ctx, args[2:])
 	case cmd == "baseline backtest":
 		return backtest(ctx, args[2:])
+	case len(args) >= 1 && args[0] == "serve":
+		return serve(ctx, args[1:])
+	case cmd == "phase analyze":
+		return phaseAnalyze(ctx, args[2:])
+	case cmd == "analysis realism":
+		return analysisRealism(ctx, args[2:])
+	case cmd == "analysis team-profile":
+		return analysisTeamProfile(ctx, args[2:])
+	case cmd == "ingest apifootball":
+		return ingestAPIFootball(ctx, args[2:])
+	case cmd == "fetch apifootball":
+		return fetchAPIFootball(ctx, args[2:])
 	default:
 		return errUsage
 	}
@@ -137,7 +166,8 @@ func ingestFootballData(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("upserted %d matches (%d played), %d odds rows\n", stats.Matches, stats.Played, stats.OddsRows)
+	fmt.Printf("upserted %d matches (%d played, %d awarded/forfeit), %d odds rows\n",
+		stats.Matches, stats.Played, stats.Awarded, stats.OddsRows)
 	return nil
 }
 
@@ -155,7 +185,9 @@ func backtest(ctx context.Context, args []string) error {
 		if err != nil {
 			return err
 		}
-		matches = toBaseline(raw)
+		if matches, err = toBaseline(raw); err != nil {
+			return err
+		}
 	} else {
 		st, err := store.Open(ctx, dsn())
 		if err != nil {
@@ -178,19 +210,28 @@ func backtest(ctx context.Context, args []string) error {
 	return baseline.WriteReports(os.Stdout, reports)
 }
 
-// toBaseline converts parsed CSV rows using the same odds preference as the
-// database query, so both backtest paths score identically.
-func toBaseline(raw []footballdata.Match) []baseline.Match {
+// toBaseline converts parsed CSV rows with the same canonical team names,
+// forfeit filter and odds preference as the database path, so both backtest
+// paths score identically.
+func toBaseline(raw []footballdata.Match) ([]baseline.Match, error) {
 	rank := map[string]int{}
 	for i, k := range baseline.OddsPreference {
 		rank[k] = i + 1
 	}
 	var out []baseline.Match
 	for _, m := range raw {
-		if !m.Played() {
+		if !m.Played() || m.Awarded() {
 			continue
 		}
-		bm := baseline.Match{Season: m.Season, Kickoff: m.Kickoff, Home: m.Home, Away: m.Away,
+		home, err := teams.Canonical(footballdata.Source, m.Home)
+		if err != nil {
+			return nil, err
+		}
+		away, err := teams.Canonical(footballdata.Source, m.Away)
+		if err != nil {
+			return nil, err
+		}
+		bm := baseline.Match{Season: m.Season, Kickoff: m.Kickoff, Home: home, Away: away,
 			HomeGoals: *m.HomeGoals, AwayGoals: *m.AwayGoals}
 		best := 0
 		for _, o := range m.Odds {
@@ -202,5 +243,5 @@ func toBaseline(raw []footballdata.Match) []baseline.Match {
 		}
 		out = append(out, bm)
 	}
-	return out
+	return out, nil
 }
